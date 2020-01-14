@@ -316,8 +316,8 @@ server <- function(input, output) {
   s3load(object = "inputs.RData", bucket = s3BucketName)
   inputs <<- inputs
   
-  fjoldiAa <- nrow(riverdata)
-  fjoldiEldis <- nrow(farmsites)
+  amountOfAa <- nrow(riverdata)
+  amountOfEldis <- nrow(farmsites)
   
   defZoom = 5
   mybins=c(0,4,10,100)
@@ -419,7 +419,7 @@ server <- function(input, output) {
   dataGraph <- reactive({
     Graph <- input$Graph
     if (Graph == 1) {
-      Graph = fjoldiEldis+2
+      Graph = amountOfEldis+2
     }
     Graph
   })
@@ -428,7 +428,7 @@ server <- function(input, output) {
   dataGraph2 <- reactive({
     Graph2 <- input$Graph2
     if (Graph2 == 1) {
-      Graph2 = fjoldiEldis+2
+      Graph2 = amountOfEldis+2
     }
     Graph2
   })
@@ -441,7 +441,7 @@ server <- function(input, output) {
                       dataKviTotal(),
                       row.names =  as.character(riverdata$RiverName))
 
-    kvi$"Farmed salmons" <- rowSums(kvi[, 2:(fjoldiEldis+1)])
+    kvi$"Farmed salmons" <- rowSums(kvi[, 2:(amountOfEldis+1)])
     colnames(kvi) <-
       c(
         "Wild salmons",
@@ -452,7 +452,7 @@ server <- function(input, output) {
                                    digits = 4) * 100
     Total <- colSums(kvi)
 
-    Total[fjoldiEldis+3] = round(sum(kvi$"Farmed salmons") / (
+    Total[amountOfEldis+3] = round(sum(kvi$"Farmed salmons") / (
       sum(kvi$"Farmed salmons") + sum(kvi$"Wild salmons")
     ), digits = 4)*100
     kvi <- rbind(kvi, Total)
@@ -547,28 +547,28 @@ server <- function(input, output) {
   ## Output plot ---------------------------------
   # Teiknar upp súluritið, síar út tóm eldi og ár sem verða ekki fyrir áhrifum
   output$myPlot1 <- renderPlot({
-    yHnit <- dataKvi()[1:fjoldiAa, as.integer(dataGraph())]
+    yHnit <- dataKvi()[1:amountOfAa, as.integer(dataGraph())]
     yHnit <- yHnit[order(riverdata$"position")]
     xNofn <- riverdata$RiverName[order(riverdata$"position")]
     xNofn <- factor(xNofn, levels = unique(xNofn))
     if (input$all == 1) {
-      ahrif <- which(yHnit != 0, arr.ind = T)
+      influence <- which(yHnit != 0, arr.ind = T)
     }
     else {
-      ahrif <- which(yHnit > -1, arr.ind = T)
+      influence <- which(yHnit > -1, arr.ind = T)
     }
-    if (length(ahrif) == 0) {
-      ahrif = 0
+    if (length(influence) == 0) {
+      influence = 0
     }
     if (input$radio == 1) {
-      ggplot(data = dataKvi()[ahrif, ], aes(x = xNofn[ahrif], y = yHnit[ahrif])) + geom_bar(stat =
+      ggplot(data = dataKvi()[influence, ], aes(x = xNofn[influence], y = yHnit[influence])) + geom_bar(stat =
                                                                                               "identity") + xlab("Salmon river") + ylab("Amount of farmed salmons in river") + theme(axis.text.x = element_text(angle = 60, hjust = 1))
     }
     else{
-      fjoldiVilltra <- dataKvi()[order(riverdata$"position"), 1]
-      prosentur <- yHnit / (fjoldiVilltra + yHnit) * 100
-      ggplot(data = dataKvi()[ahrif, ], aes(x = xNofn[ahrif], y = prosentur[ahrif])) + geom_bar(stat =
-                                                                                                  "identity", aes(fill = ifelse(prosentur[ahrif] < 4, "darkgreen", ifelse(prosentur[ahrif] < 10, "gold", "red3")))) + xlab("Salmon river") + ylab("Percentage of farmed salmons in river") + theme(axis.text.x = element_text(angle = 60, hjust = 1)) + geom_hline(yintercept =  4, color = "gold") + geom_hline(yintercept =  10, color = "red3") +scale_fill_manual(values = c('darkgreen', 'gold','red3'))  + theme(legend.position =
+      amountOfVilltra <- dataKvi()[order(riverdata$"position"), 1]
+      prosentur <- yHnit / (amountOfVilltra + yHnit) * 100
+      ggplot(data = dataKvi()[influence, ], aes(x = xNofn[influence], y = prosentur[influence])) + geom_bar(stat =
+                                                                                                  "identity", aes(fill = ifelse(prosentur[influence] < 4, "darkgreen", ifelse(prosentur[influence] < 10, "gold", "red3")))) + xlab("Salmon river") + ylab("Percentage of farmed salmons in river") + theme(axis.text.x = element_text(angle = 60, hjust = 1)) + geom_hline(yintercept =  4, color = "gold") + geom_hline(yintercept =  10, color = "red3") +scale_fill_manual(values = c('darkgreen', 'gold','red3'))  + theme(legend.position =
                                                                                                                                                                                                                                                                                                                                                                                               "none")
     }
   })
@@ -576,14 +576,14 @@ server <- function(input, output) {
   ## Output Weibull ---------------------------------
   # Teiknar weibull dreifingar Graphið og notar til þess weibb föllin
   output$myPlot2 <- renderPlot({
-    if (as.integer(dataGraph2()) == fjoldiEldis+2) {
-      weibbS <- rep.int(0, fjoldiAa)
-      weibbB <- rep.int(0, fjoldiAa)
+    if (as.integer(dataGraph2()) == amountOfEldis+2) {
+      weibbS <- rep.int(0, amountOfAa)
+      weibbB <- rep.int(0, amountOfAa)
       weibbSL <- rep.int(0, 2431)
       weibbBL <- rep.int(0, 2431)
-      tolur <- data.frame(c(-1215:1215))
-      colnames(tolur) = c('tolur')
-      for (i in c(1:fjoldiEldis)) {
+      nums <- data.frame(c(-1215:1215))
+      colnames(nums) = c('nums')
+      for (i in c(1:amountOfEldis)) {
         weibbS = weibbS + weib(farmsites[i, 2], input$beta, input$eta)
         weibbB = weibbB + weib(farmsites[i, 2], input$beta2, input$eta2)
         weibbSL = weibbSL + weibL(farmsites[i, 2], input$beta, input$eta)
@@ -595,8 +595,8 @@ server <- function(input, output) {
                               y = weibbS,
                               colour = "Early escapees"
                             )) +
-        geom_line(data = tolur, aes(
-          x = tolur,
+        geom_line(data = nums, aes(
+          x = nums,
           y = weibbSL,
           colour = "Early escapees"
         )) +
@@ -606,8 +606,8 @@ server <- function(input, output) {
                      y = weibbB,
                      colour = "Late escapees"
                    )) +
-        geom_line(data = tolur, aes(
-          x = tolur,
+        geom_line(data = nums, aes(
+          x = nums,
           y = weibbBL,
           colour = "Late escapees"
         )) +
@@ -617,9 +617,9 @@ server <- function(input, output) {
                      y = weibbB + weibbS,
                      colour = "Total escapees"
                    )) +
-        geom_line(data = tolur,
+        geom_line(data = nums,
                   aes(
-                    x = tolur,
+                    x = nums,
                     y = weibbBL + weibbSL,
                     colour = "Total escapees"
                   )) +
@@ -627,16 +627,16 @@ server <- function(input, output) {
                                                                 NULL)
     } else{
       stadsetning <- farmsites[as.integer(dataGraph2()) - 1, 2]
-      tolur <- data.frame(c(-1215:1215))
-      colnames(tolur) = c('tolur')
+      nums <- data.frame(c(-1215:1215))
+      colnames(nums) = c('nums')
       ggplot() + geom_point(data = riverdata,
                             aes(
                               x = position,
                               y = weib(stadsetning, input$beta, input$eta),
                               colour = "Early escapees"
                             )) +
-        geom_line(data = tolur, aes(
-          x = tolur,
+        geom_line(data = nums, aes(
+          x = nums,
           y = weibL(stadsetning, input$beta, input$eta),
           colour = "Early escapees"
         )) +
@@ -645,8 +645,8 @@ server <- function(input, output) {
           y = weib(stadsetning, input$beta2, input$eta2),
           colour = "Late escapees"
         )) +
-        geom_line(data = tolur, aes(
-          x = tolur,
+        geom_line(data = nums, aes(
+          x = nums,
           y = weibL(stadsetning, input$beta2, input$eta2),
           colour = "Late escapees"
         )) +
@@ -656,9 +656,9 @@ server <- function(input, output) {
                      y = weib(stadsetning, input$beta2, input$eta2) + weib(stadsetning, input$beta, input$eta),
                      colour = "Total escapees"
                    )) +
-        geom_line(data = tolur,
+        geom_line(data = nums,
                   aes(
-                    x = tolur,
+                    x = nums,
                     y = weibL(stadsetning, input$beta2, input$eta2) + weibL(stadsetning, input$beta, input$eta),
                     colour = "Total escapees"
                   )) +
@@ -670,15 +670,15 @@ server <- function(input, output) {
   ## Output table ---------------------------------
   # skrifar út töfluna
   output$table <- DT::renderDataTable({
-    yHnit <- dataKvi()[1:(fjoldiAa+1), "Farmed salmons"]
-    xHnit <- dataKvi()[(fjoldiAa+1), ]
-    ahrifX <- which(xHnit != 0, arr.ind = T)[, 2]
-    if (sum(dataKvi()[1:fjoldiAa, "Farmed salmons"]) != 0) {
-      ahrifY <- which(yHnit != 0, arr.ind = T)
-      df <- dataKvi()[ahrifY, ahrifX]
+    yHnit <- dataKvi()[1:(amountOfAa+1), "Farmed salmons"]
+    xHnit <- dataKvi()[(amountOfAa+1), ]
+    influenceX <- which(xHnit != 0, arr.ind = T)[, 2]
+    if (sum(dataKvi()[1:amountOfAa, "Farmed salmons"]) != 0) {
+      influenceY <- which(yHnit != 0, arr.ind = T)
+      df <- dataKvi()[influenceY, influenceX]
     } else{
-      ahrifY <- c(1:fjoldiAa)
-      df  = data.frame(dataKvi()$"Wild salmons"[1:fjoldiAa], row.names = riverdata$RiverName)
+      influenceY <- c(1:amountOfAa)
+      df  = data.frame(dataKvi()$"Wild salmons"[1:amountOfAa], row.names = riverdata$RiverName)
       colnames(df) = "Wild salmons"
     }
     datatable(df,
@@ -694,11 +694,11 @@ server <- function(input, output) {
   Dreifing <- function(arg1, beta, eta, annualProd, escapesPerTon, sexMat, seatime, crit, home){
     
     
-    tolur <- c(1:4200)
-    hamark <- which.max((beta/eta)*((tolur/eta)^(beta-1))*exp(-1*((tolur/eta)^beta)))
+    nums <- c(1:4200)
+    hamark <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
     
     fjarlaegd <- riverdata$position-arg1
-    for(i in c(1:fjoldiAa)){
+    for(i in c(1:amountOfAa)){
       if (fjarlaegd[i] < -1215){
         fjarlaegd[i] = 2430 + fjarlaegd[i]
       }
@@ -707,33 +707,33 @@ server <- function(input, output) {
       }
     }
     logudFjarlaegd <- fjarlaegd  + hamark
-    logudFjarlaegd[fjoldiAa+1] = hamark
+    logudFjarlaegd[amountOfAa+1] = hamark
     
     weibull <- ifelse(logudFjarlaegd > 0, (beta/eta)*((logudFjarlaegd/eta)^(beta-1))*exp(-1*((logudFjarlaegd/eta)^beta)),0)
     heildarLikur <- sum(weibull)
-    fjoldiIA <- rep(0,fjoldiAa+1)
-    for(i in c(1:fjoldiAa)){
-      fjoldiIA[i] = riverdata[i,"Stock.Size"]
+    amountOfIA <- rep(0,amountOfAa+1)
+    for(i in c(1:amountOfAa)){
+      amountOfIA[i] = riverdata[i,"Stock.Size"]
     }
-    fjoldiIA[fjoldiAa+1] = annualProd*home
-    weibullxStock <- weibull*fjoldiIA/heildarLikur
+    amountOfIA[amountOfAa+1] = annualProd*home
+    weibullxStock <- weibull*amountOfIA/heildarLikur
     
     weibullxStockNormalized <- weibullxStock/sum(weibullxStock)
     
     FarmedFishInRiver <- annualProd*escapesPerTon*weibullxStockNormalized*15/18*sexMat*crit/seatime
     
     
-    return(FarmedFishInRiver[1:fjoldiAa])
+    return(FarmedFishInRiver[1:amountOfAa])
   }
   
   ## smoltDreifing ---------------------------------
   smoltDreifing <- function(arg1, beta, eta, annualProd, escapesPerTon,survival,home){
     
-    tolur <- c(1:4200)
-    hamark <- which.max((beta/eta)*((tolur/eta)^(beta-1))*exp(-1*((tolur/eta)^beta)))
+    nums <- c(1:4200)
+    hamark <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
     
     fjarlaegd <- riverdata$position-arg1
-    for(i in c(1:fjoldiAa)){
+    for(i in c(1:amountOfAa)){
       if (fjarlaegd[i] < -1215){
         fjarlaegd[i] = 2430 + fjarlaegd[i]
       }
@@ -742,37 +742,37 @@ server <- function(input, output) {
       }
     }
     logudFjarlaegd <- fjarlaegd  + hamark
-    logudFjarlaegd[fjoldiAa+1] = hamark
+    logudFjarlaegd[amountOfAa+1] = hamark
     
     weibull <- ifelse(logudFjarlaegd > 0, (beta/eta)*((logudFjarlaegd/eta)^(beta-1))*exp(-1*((logudFjarlaegd/eta)^beta)),0)
     
     heildarLikur <- sum(weibull)
     
-    fjoldiIA <- rep(0,fjoldiAa+1)
-    for(i in c(1:fjoldiAa)){
-      fjoldiIA[i] = riverdata[i,"Stock.Size"]
+    amountOfIA <- rep(0,amountOfAa+1)
+    for(i in c(1:amountOfAa)){
+      amountOfIA[i] = riverdata[i,"Stock.Size"]
     }
-    fjoldiIA[fjoldiAa+1] = annualProd*home
+    amountOfIA[amountOfAa+1] = annualProd*home
     
-    weibullxStock <- weibull*fjoldiIA/heildarLikur
+    weibullxStock <- weibull*amountOfIA/heildarLikur
     
     weibullxStockNormalized <- weibullxStock/sum(weibullxStock)
     
     FarmedFishInRiver <- annualProd*escapesPerTon*weibullxStockNormalized*survival
     
     
-    return(FarmedFishInRiver[1:fjoldiAa])
+    return(FarmedFishInRiver[1:amountOfAa])
   }
   
   ## weib ---------------------------------
   weib<-function(arg1, beta, eta){
     
-    tolur <- c(1:4200)
-    hamark <- which.max((beta/eta)*((tolur/eta)^(beta-1))*exp(-1*((tolur/eta)^beta)))
+    nums <- c(1:4200)
+    hamark <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
     
     
     fjarlaegd <- riverdata$position-arg1
-    for(i in c(1:fjoldiAa)){
+    for(i in c(1:amountOfAa)){
       if (fjarlaegd[i] < -1215){
         fjarlaegd[i] = 2430 + fjarlaegd[i]
       }
@@ -789,12 +789,12 @@ server <- function(input, output) {
   ## weib line ---------------------------------
   weibL <- function(arg1, beta, eta){
     
-    tolur <- c(1:4200)
-    tolurL <- c(-1215:1215)
-    hamark <- which.max((beta/eta)*((tolur/eta)^(beta-1))*exp(-1*((tolur/eta)^beta)))
+    nums <- c(1:4200)
+    numsL <- c(-1215:1215)
+    hamark <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
     
     
-    fjarlaegd <- tolurL-arg1
+    fjarlaegd <- numsL-arg1
     
     for(i in c(1:2431)){
       if (fjarlaegd[i] < -1215){
