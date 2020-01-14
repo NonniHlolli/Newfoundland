@@ -697,19 +697,19 @@ server <- function(input, output) {
     nums <- c(1:4200)
     hamark <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
     
-    fjarlaegd <- riverdata$position-arg1
+    distance <- riverdata$position-arg1
     for(i in c(1:amountOfAa)){
-      if (fjarlaegd[i] < -1215){
-        fjarlaegd[i] = 2430 + fjarlaegd[i]
+      if (distance[i] < -1215){
+        distance[i] = 2430 + distance[i]
       }
-      else if (fjarlaegd[i] > 1215){
-        fjarlaegd[i] = - 2430 + fjarlaegd[i]
+      else if (distance[i] > 1215){
+        distance[i] = - 2430 + distance[i]
       }
     }
-    logudFjarlaegd <- fjarlaegd  + hamark
-    logudFjarlaegd[amountOfAa+1] = hamark
+    amendedDistance <- distance  + hamark
+    amendedDistance[amountOfAa+1] = hamark
     
-    weibull <- ifelse(logudFjarlaegd > 0, (beta/eta)*((logudFjarlaegd/eta)^(beta-1))*exp(-1*((logudFjarlaegd/eta)^beta)),0)
+    weibull <- ifelse(amendedDistance > 0, (beta/eta)*((amendedDistance/eta)^(beta-1))*exp(-1*((amendedDistance/eta)^beta)),0)
     heildarLikur <- sum(weibull)
     amountOfIA <- rep(0,amountOfAa+1)
     for(i in c(1:amountOfAa)){
@@ -732,19 +732,19 @@ server <- function(input, output) {
     nums <- c(1:4200)
     hamark <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
     
-    fjarlaegd <- riverdata$position-arg1
+    distance <- riverdata$position-arg1
     for(i in c(1:amountOfAa)){
-      if (fjarlaegd[i] < -1215){
-        fjarlaegd[i] = 2430 + fjarlaegd[i]
+      if (distance[i] < -1215){
+        distance[i] = 2430 + distance[i]
       }
-      else if (fjarlaegd[i] > 1215){
-        fjarlaegd[i] = - 2430 + fjarlaegd[i]
+      else if (distance[i] > 1215){
+        distance[i] = - 2430 + distance[i]
       }
     }
-    logudFjarlaegd <- fjarlaegd  + hamark
-    logudFjarlaegd[amountOfAa+1] = hamark
+    amendedDistance <- distance  + hamark
+    amendedDistance[amountOfAa+1] = hamark
     
-    weibull <- ifelse(logudFjarlaegd > 0, (beta/eta)*((logudFjarlaegd/eta)^(beta-1))*exp(-1*((logudFjarlaegd/eta)^beta)),0)
+    weibull <- ifelse(amendedDistance > 0, (beta/eta)*((amendedDistance/eta)^(beta-1))*exp(-1*((amendedDistance/eta)^beta)),0)
     
     heildarLikur <- sum(weibull)
     
@@ -771,19 +771,19 @@ server <- function(input, output) {
     hamark <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
     
     
-    fjarlaegd <- riverdata$position-arg1
+    distance <- riverdata$position-arg1
     for(i in c(1:amountOfAa)){
-      if (fjarlaegd[i] < -1215){
-        fjarlaegd[i] = 2430 + fjarlaegd[i]
+      if (distance[i] < -1215){
+        distance[i] = 2430 + distance[i]
       }
-      else if (fjarlaegd[i] > 1215){
-        fjarlaegd[i] = - 2430 + fjarlaegd[i]
+      else if (distance[i] > 1215){
+        distance[i] = - 2430 + distance[i]
       }
     }
     
-    logudFjarlaegd <- fjarlaegd  + hamark
+    amendedDistance <- distance  + hamark
     
-    weibull <- ifelse(logudFjarlaegd > 0, (beta/eta)*((logudFjarlaegd/eta)^(beta-1))*exp(-1*((logudFjarlaegd/eta)^beta)),0)
+    weibull <- ifelse(amendedDistance > 0, (beta/eta)*((amendedDistance/eta)^(beta-1))*exp(-1*((amendedDistance/eta)^beta)),0)
     return(weibull)
   }
   ## weib line ---------------------------------
@@ -794,20 +794,20 @@ server <- function(input, output) {
     hamark <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
     
     
-    fjarlaegd <- numsL-arg1
+    distance <- numsL-arg1
     
     for(i in c(1:2431)){
-      if (fjarlaegd[i] < -1215){
-        fjarlaegd[i] = 2430 + fjarlaegd[i]
+      if (distance[i] < -1215){
+        distance[i] = 2430 + distance[i]
       }
-      else if (fjarlaegd[i] > 1215){
-        fjarlaegd[i] = - 2430 + fjarlaegd[i]
+      else if (distance[i] > 1215){
+        distance[i] = - 2430 + distance[i]
       }
     }
     
-    logudFjarlaegd <- fjarlaegd  + hamark
+    amendedDistance <- distance  + hamark
     
-    weibull <- ifelse(logudFjarlaegd > 0, (beta/eta)*((logudFjarlaegd/eta)^(beta-1))*exp(-1*((logudFjarlaegd/eta)^beta)),0)
+    weibull <- ifelse(amendedDistance > 0, (beta/eta)*((amendedDistance/eta)^(beta-1))*exp(-1*((amendedDistance/eta)^beta)),0)
     return(weibull)
   }
   ## Save ------------------
