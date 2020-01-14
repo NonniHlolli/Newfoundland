@@ -1,0 +1,4 @@
+.tab-content>.active{
+  overflow: auto;
+  height: 90vh;
+}
