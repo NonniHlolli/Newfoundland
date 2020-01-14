@@ -356,7 +356,7 @@ server <- function(input, output) {
     })
   
   ## dataKviAdult ---------------------------------
-  # Föll sem taka inn riverdataýsingarnar um eldisstaðina og reikna út dreifinguna á fiskunum
+  # Föll sem taka inn riverdataýsingarnar um eldisstaðina og reikna út Distributionuna á fiskunum
   dataKviAdult <- reactive({
     kviAdult <- data.frame(
       lapply(rownames(farmsites),
@@ -367,7 +367,7 @@ server <- function(input, output) {
                  amount=0
                }
                amount = amount*1000 
-               Dreifing(
+               Distribution(
                  farmsites[x, "position"],
                  input$beta2,
                  input$eta2,
@@ -394,7 +394,7 @@ server <- function(input, output) {
                  amount=0
                }
                amount = amount*1000
-               smoltDreifing(
+               smoltDistribution(
                  farmsites[x, "position"],
                  input$beta,
                  input$eta,
@@ -435,7 +435,7 @@ server <- function(input, output) {
   
   
   ## dataKvi ---------------------------------
-  #Fall sem setur upp data.frameið sem inniheldur allar riverdataýsingar, t.d. dreifingar, stock size o.fl
+  #Fall sem setur upp data.frameið sem inniheldur allar riverdataýsingar, t.d. Distributionar, stock size o.fl
   dataKvi <- reactive({
     kvi <- data.frame(riverdata$Stock.Size,
                       dataKviTotal(),
@@ -574,7 +574,7 @@ server <- function(input, output) {
   })
   
   ## Output Weibull ---------------------------------
-  # Teiknar weibull dreifingar Graphið og notar til þess weibb föllin
+  # Teiknar weibull Distributionar Graphið og notar til þess weibb föllin
   output$myPlot2 <- renderPlot({
     if (as.integer(dataGraph2()) == amountOfEldis+2) {
       weibbS <- rep.int(0, amountOfAa)
@@ -690,8 +690,8 @@ server <- function(input, output) {
   })
   
  
-  ## Dreifing ---------------------------------
-  Dreifing <- function(arg1, beta, eta, annualProd, escapesPerTon, sexMat, seatime, crit, home){
+  ## Distribution ---------------------------------
+  Distribution <- function(arg1, beta, eta, annualProd, escapesPerTon, sexMat, seatime, crit, home){
     
     
     nums <- c(1:4200)
@@ -726,8 +726,8 @@ server <- function(input, output) {
     return(FarmedFishInRiver[1:amountOfAa])
   }
   
-  ## smoltDreifing ---------------------------------
-  smoltDreifing <- function(arg1, beta, eta, annualProd, escapesPerTon,survival,home){
+  ## smoltDistribution ---------------------------------
+  smoltDistribution <- function(arg1, beta, eta, annualProd, escapesPerTon,survival,home){
     
     nums <- c(1:4200)
     hamark <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
