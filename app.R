@@ -316,7 +316,7 @@ server <- function(input, output) {
   s3load(object = "inputs.RData", bucket = s3BucketName)
   inputs <<- inputs
   
-  amountOfAa <- nrow(riverdata)
+  amountOfRivers <- nrow(riverdata)
   amountOfEldis <- nrow(farmsites)
   
   defZoom = 5
@@ -547,7 +547,7 @@ server <- function(input, output) {
   ## Output plot ---------------------------------
   # Teiknar upp súluritið, síar út tóm eldi og ár sem verða ekki fyrir áhrifum
   output$myPlot1 <- renderPlot({
-    yHnit <- dataKvi()[1:amountOfAa, as.integer(dataGraph())]
+    yHnit <- dataKvi()[1:amountOfRivers, as.integer(dataGraph())]
     yHnit <- yHnit[order(riverdata$"position")]
     xNofn <- riverdata$RiverName[order(riverdata$"position")]
     xNofn <- factor(xNofn, levels = unique(xNofn))
@@ -577,8 +577,8 @@ server <- function(input, output) {
   # Teiknar weibull Distributionar Graphið og notar til þess weibb föllin
   output$myPlot2 <- renderPlot({
     if (as.integer(dataGraph2()) == amountOfEldis+2) {
-      weibbS <- rep.int(0, amountOfAa)
-      weibbB <- rep.int(0, amountOfAa)
+      weibbS <- rep.int(0, amountOfRivers)
+      weibbB <- rep.int(0, amountOfRivers)
       weibbSL <- rep.int(0, 2431)
       weibbBL <- rep.int(0, 2431)
       nums <- data.frame(c(-1215:1215))
@@ -670,15 +670,15 @@ server <- function(input, output) {
   ## Output table ---------------------------------
   # skrifar út töfluna
   output$table <- DT::renderDataTable({
-    yHnit <- dataKvi()[1:(amountOfAa+1), "Farmed salmons"]
-    xHnit <- dataKvi()[(amountOfAa+1), ]
+    yHnit <- dataKvi()[1:(amountOfRivers+1), "Farmed salmons"]
+    xHnit <- dataKvi()[(amountOfRivers+1), ]
     influenceX <- which(xHnit != 0, arr.ind = T)[, 2]
-    if (sum(dataKvi()[1:amountOfAa, "Farmed salmons"]) != 0) {
+    if (sum(dataKvi()[1:amountOfRivers, "Farmed salmons"]) != 0) {
       influenceY <- which(yHnit != 0, arr.ind = T)
       df <- dataKvi()[influenceY, influenceX]
     } else{
-      influenceY <- c(1:amountOfAa)
-      df  = data.frame(dataKvi()$"Wild salmons"[1:amountOfAa], row.names = riverdata$RiverName)
+      influenceY <- c(1:amountOfRivers)
+      df  = data.frame(dataKvi()$"Wild salmons"[1:amountOfRivers], row.names = riverdata$RiverName)
       colnames(df) = "Wild salmons"
     }
     datatable(df,
@@ -698,7 +698,7 @@ server <- function(input, output) {
     hamark <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
     
     distance <- riverdata$position-arg1
-    for(i in c(1:amountOfAa)){
+    for(i in c(1:amountOfRivers)){
       if (distance[i] < -1215){
         distance[i] = 2430 + distance[i]
       }
@@ -707,23 +707,23 @@ server <- function(input, output) {
       }
     }
     amendedDistance <- distance  + hamark
-    amendedDistance[amountOfAa+1] = hamark
+    amendedDistance[amountOfRivers+1] = hamark
     
     weibull <- ifelse(amendedDistance > 0, (beta/eta)*((amendedDistance/eta)^(beta-1))*exp(-1*((amendedDistance/eta)^beta)),0)
     heildarLikur <- sum(weibull)
-    amountOfIA <- rep(0,amountOfAa+1)
-    for(i in c(1:amountOfAa)){
-      amountOfIA[i] = riverdata[i,"Stock.Size"]
+    amountInRiver <- rep(0,amountOfRivers+1)
+    for(i in c(1:amountOfRivers)){
+      amountInRiver[i] = riverdata[i,"Stock.Size"]
     }
-    amountOfIA[amountOfAa+1] = annualProd*home
-    weibullxStock <- weibull*amountOfIA/heildarLikur
+    amountInRiver[amountOfRivers+1] = annualProd*home
+    weibullxStock <- weibull*amountInRiver/heildarLikur
     
     weibullxStockNormalized <- weibullxStock/sum(weibullxStock)
     
     FarmedFishInRiver <- annualProd*escapesPerTon*weibullxStockNormalized*15/18*sexMat*crit/seatime
     
     
-    return(FarmedFishInRiver[1:amountOfAa])
+    return(FarmedFishInRiver[1:amountOfRivers])
   }
   
   ## smoltDistribution ---------------------------------
@@ -733,7 +733,7 @@ server <- function(input, output) {
     hamark <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
     
     distance <- riverdata$position-arg1
-    for(i in c(1:amountOfAa)){
+    for(i in c(1:amountOfRivers)){
       if (distance[i] < -1215){
         distance[i] = 2430 + distance[i]
       }
@@ -742,26 +742,26 @@ server <- function(input, output) {
       }
     }
     amendedDistance <- distance  + hamark
-    amendedDistance[amountOfAa+1] = hamark
+    amendedDistance[amountOfRivers+1] = hamark
     
     weibull <- ifelse(amendedDistance > 0, (beta/eta)*((amendedDistance/eta)^(beta-1))*exp(-1*((amendedDistance/eta)^beta)),0)
     
     heildarLikur <- sum(weibull)
     
-    amountOfIA <- rep(0,amountOfAa+1)
-    for(i in c(1:amountOfAa)){
-      amountOfIA[i] = riverdata[i,"Stock.Size"]
+    amountInRiver <- rep(0,amountOfRivers+1)
+    for(i in c(1:amountOfRivers)){
+      amountInRiver[i] = riverdata[i,"Stock.Size"]
     }
-    amountOfIA[amountOfAa+1] = annualProd*home
+    amountInRiver[amountOfRivers+1] = annualProd*home
     
-    weibullxStock <- weibull*amountOfIA/heildarLikur
+    weibullxStock <- weibull*amountInRiver/heildarLikur
     
     weibullxStockNormalized <- weibullxStock/sum(weibullxStock)
     
     FarmedFishInRiver <- annualProd*escapesPerTon*weibullxStockNormalized*survival
     
     
-    return(FarmedFishInRiver[1:amountOfAa])
+    return(FarmedFishInRiver[1:amountOfRivers])
   }
   
   ## weib ---------------------------------
@@ -772,7 +772,7 @@ server <- function(input, output) {
     
     
     distance <- riverdata$position-arg1
-    for(i in c(1:amountOfAa)){
+    for(i in c(1:amountOfRivers)){
       if (distance[i] < -1215){
         distance[i] = 2430 + distance[i]
       }
