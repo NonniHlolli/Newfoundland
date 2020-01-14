@@ -695,7 +695,7 @@ server <- function(input, output) {
     
     
     nums <- c(1:4200)
-    hamark <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
+    maximum <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
     
     distance <- riverdata$position-arg1
     for(i in c(1:amountOfRivers)){
@@ -706,8 +706,8 @@ server <- function(input, output) {
         distance[i] = - 2430 + distance[i]
       }
     }
-    amendedDistance <- distance  + hamark
-    amendedDistance[amountOfRivers+1] = hamark
+    amendedDistance <- distance  + maximum
+    amendedDistance[amountOfRivers+1] = maximum
     
     weibull <- ifelse(amendedDistance > 0, (beta/eta)*((amendedDistance/eta)^(beta-1))*exp(-1*((amendedDistance/eta)^beta)),0)
     totalProbability <- sum(weibull)
@@ -730,7 +730,7 @@ server <- function(input, output) {
   smoltDistribution <- function(arg1, beta, eta, annualProd, escapesPerTon,survival,home){
     
     nums <- c(1:4200)
-    hamark <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
+    maximum <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
     
     distance <- riverdata$position-arg1
     for(i in c(1:amountOfRivers)){
@@ -741,8 +741,8 @@ server <- function(input, output) {
         distance[i] = - 2430 + distance[i]
       }
     }
-    amendedDistance <- distance  + hamark
-    amendedDistance[amountOfRivers+1] = hamark
+    amendedDistance <- distance  + maximum
+    amendedDistance[amountOfRivers+1] = maximum
     
     weibull <- ifelse(amendedDistance > 0, (beta/eta)*((amendedDistance/eta)^(beta-1))*exp(-1*((amendedDistance/eta)^beta)),0)
     
@@ -768,7 +768,7 @@ server <- function(input, output) {
   weib<-function(arg1, beta, eta){
     
     nums <- c(1:4200)
-    hamark <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
+    maximum <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
     
     
     distance <- riverdata$position-arg1
@@ -781,7 +781,7 @@ server <- function(input, output) {
       }
     }
     
-    amendedDistance <- distance  + hamark
+    amendedDistance <- distance  + maximum
     
     weibull <- ifelse(amendedDistance > 0, (beta/eta)*((amendedDistance/eta)^(beta-1))*exp(-1*((amendedDistance/eta)^beta)),0)
     return(weibull)
@@ -791,7 +791,7 @@ server <- function(input, output) {
     
     nums <- c(1:4200)
     numsL <- c(-1215:1215)
-    hamark <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
+    maximum <- which.max((beta/eta)*((nums/eta)^(beta-1))*exp(-1*((nums/eta)^beta)))
     
     
     distance <- numsL-arg1
@@ -805,7 +805,7 @@ server <- function(input, output) {
       }
     }
     
-    amendedDistance <- distance  + hamark
+    amendedDistance <- distance  + maximum
     
     weibull <- ifelse(amendedDistance > 0, (beta/eta)*((amendedDistance/eta)^(beta-1))*exp(-1*((amendedDistance/eta)^beta)),0)
     return(weibull)
