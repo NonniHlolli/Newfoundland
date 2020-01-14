@@ -547,26 +547,26 @@ server <- function(input, output) {
   ## Output plot ---------------------------------
   # Teiknar upp súluritið, síar út tóm eldi og ár sem verða ekki fyrir áhrifum
   output$myPlot1 <- renderPlot({
-    yHnit <- dataKvi()[1:amountOfRivers, as.integer(dataGraph())]
-    yHnit <- yHnit[order(riverdata$"position")]
+    yCoord <- dataKvi()[1:amountOfRivers, as.integer(dataGraph())]
+    yCoord <- yCoord[order(riverdata$"position")]
     xNofn <- riverdata$RiverName[order(riverdata$"position")]
     xNofn <- factor(xNofn, levels = unique(xNofn))
     if (input$all == 1) {
-      influence <- which(yHnit != 0, arr.ind = T)
+      influence <- which(yCoord != 0, arr.ind = T)
     }
     else {
-      influence <- which(yHnit > -1, arr.ind = T)
+      influence <- which(yCoord > -1, arr.ind = T)
     }
     if (length(influence) == 0) {
       influence = 0
     }
     if (input$radio == 1) {
-      ggplot(data = dataKvi()[influence, ], aes(x = xNofn[influence], y = yHnit[influence])) + geom_bar(stat =
+      ggplot(data = dataKvi()[influence, ], aes(x = xNofn[influence], y = yCoord[influence])) + geom_bar(stat =
                                                                                               "identity") + xlab("Salmon river") + ylab("Amount of farmed salmons in river") + theme(axis.text.x = element_text(angle = 60, hjust = 1))
     }
     else{
       amountOfVilltra <- dataKvi()[order(riverdata$"position"), 1]
-      prosentur <- yHnit / (amountOfVilltra + yHnit) * 100
+      prosentur <- yCoord / (amountOfVilltra + yCoord) * 100
       ggplot(data = dataKvi()[influence, ], aes(x = xNofn[influence], y = prosentur[influence])) + geom_bar(stat =
                                                                                                   "identity", aes(fill = ifelse(prosentur[influence] < 4, "darkgreen", ifelse(prosentur[influence] < 10, "gold", "red3")))) + xlab("Salmon river") + ylab("Percentage of farmed salmons in river") + theme(axis.text.x = element_text(angle = 60, hjust = 1)) + geom_hline(yintercept =  4, color = "gold") + geom_hline(yintercept =  10, color = "red3") +scale_fill_manual(values = c('darkgreen', 'gold','red3'))  + theme(legend.position =
                                                                                                                                                                                                                                                                                                                                                                                               "none")
@@ -670,11 +670,11 @@ server <- function(input, output) {
   ## Output table ---------------------------------
   # skrifar út töfluna
   output$table <- DT::renderDataTable({
-    yHnit <- dataKvi()[1:(amountOfRivers+1), "Farmed salmons"]
-    xHnit <- dataKvi()[(amountOfRivers+1), ]
-    influenceX <- which(xHnit != 0, arr.ind = T)[, 2]
+    yCoord <- dataKvi()[1:(amountOfRivers+1), "Farmed salmons"]
+    xCoord <- dataKvi()[(amountOfRivers+1), ]
+    influenceX <- which(xCoord != 0, arr.ind = T)[, 2]
     if (sum(dataKvi()[1:amountOfRivers, "Farmed salmons"]) != 0) {
-      influenceY <- which(yHnit != 0, arr.ind = T)
+      influenceY <- which(yCoord != 0, arr.ind = T)
       df <- dataKvi()[influenceY, influenceX]
     } else{
       influenceY <- c(1:amountOfRivers)
@@ -710,13 +710,13 @@ server <- function(input, output) {
     amendedDistance[amountOfRivers+1] = hamark
     
     weibull <- ifelse(amendedDistance > 0, (beta/eta)*((amendedDistance/eta)^(beta-1))*exp(-1*((amendedDistance/eta)^beta)),0)
-    heildarLikur <- sum(weibull)
+    totalProbability <- sum(weibull)
     amountInRiver <- rep(0,amountOfRivers+1)
     for(i in c(1:amountOfRivers)){
       amountInRiver[i] = riverdata[i,"Stock.Size"]
     }
     amountInRiver[amountOfRivers+1] = annualProd*home
-    weibullxStock <- weibull*amountInRiver/heildarLikur
+    weibullxStock <- weibull*amountInRiver/totalProbability
     
     weibullxStockNormalized <- weibullxStock/sum(weibullxStock)
     
@@ -746,7 +746,7 @@ server <- function(input, output) {
     
     weibull <- ifelse(amendedDistance > 0, (beta/eta)*((amendedDistance/eta)^(beta-1))*exp(-1*((amendedDistance/eta)^beta)),0)
     
-    heildarLikur <- sum(weibull)
+    totalProbability <- sum(weibull)
     
     amountInRiver <- rep(0,amountOfRivers+1)
     for(i in c(1:amountOfRivers)){
@@ -754,7 +754,7 @@ server <- function(input, output) {
     }
     amountInRiver[amountOfRivers+1] = annualProd*home
     
-    weibullxStock <- weibull*amountInRiver/heildarLikur
+    weibullxStock <- weibull*amountInRiver/totalProbability
     
     weibullxStockNormalized <- weibullxStock/sum(weibullxStock)
     
