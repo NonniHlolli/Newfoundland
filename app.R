@@ -15,9 +15,10 @@ library(aws.s3)
 load("Data.RData")
 riverdata <<- riverdata
 
+
 s3BucketName <- "data.riskassessment.newfoundland"
-Sys.setenv("AWS_ACCESS_KEY_ID" = "AKIAJ7ABYFGFY64HLVOA",
-           "AWS_SECRET_ACCESS_KEY" = "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",
+Sys.setenv("AWS_ACCESS_KEY_ID" = Id,
+           "AWS_SECRET_ACCESS_KEY" = Key,
            "AWS_DEFAULT_REGION" = "eu-west-1")
 
 s3load(object = "inputs.RData", bucket = s3BucketName)
