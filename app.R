@@ -64,7 +64,7 @@ body <- dashboardBody(  tabItems(
     h2("Plot"),
     plotOutput("myPlot1"),
     selectInput(
-      "graf",
+      "Graph",
       label = "Pick a farm site",
       choices = Choices,
       selected = 1
@@ -96,7 +96,7 @@ body <- dashboardBody(  tabItems(
     h2("Weibull Plot"),
     plotOutput("myPlot2"),
     selectInput(
-      "graf2",
+      "Graph2",
       label = "Pick a farm site",
       choices = Choices,
       selected = 1
@@ -414,23 +414,23 @@ server <- function(input, output) {
     kviTotal
   })
   
-  ## dataGraf ---------------------------------
-  # Tekur inn riverdataýsingar um hvað gröfin eiga að sýna
-  dataGraf <- reactive({
-    graf <- input$graf
-    if (graf == 1) {
-      graf = fjoldiEldis+2
+  ## dataGraph ---------------------------------
+  # Takes the input which chooses what farmsite to show
+  dataGraph <- reactive({
+    Graph <- input$Graph
+    if (Graph == 1) {
+      Graph = fjoldiEldis+2
     }
-    graf
+    Graph
   })
   
-  ## dataGraf ---------------------------------
-  dataGraf2 <- reactive({
-    graf2 <- input$graf2
-    if (graf2 == 1) {
-      graf2 = fjoldiEldis+2
+  ## dataGraph2 ---------------------------------
+  dataGraph2 <- reactive({
+    Graph2 <- input$Graph2
+    if (Graph2 == 1) {
+      Graph2 = fjoldiEldis+2
     }
-    graf2
+    Graph2
   })
   
   
@@ -547,7 +547,7 @@ server <- function(input, output) {
   ## Output plot ---------------------------------
   # Teiknar upp súluritið, síar út tóm eldi og ár sem verða ekki fyrir áhrifum
   output$myPlot1 <- renderPlot({
-    yHnit <- dataKvi()[1:fjoldiAa, as.integer(dataGraf())]
+    yHnit <- dataKvi()[1:fjoldiAa, as.integer(dataGraph())]
     yHnit <- yHnit[order(riverdata$"position")]
     xNofn <- riverdata$RiverName[order(riverdata$"position")]
     xNofn <- factor(xNofn, levels = unique(xNofn))
@@ -574,9 +574,9 @@ server <- function(input, output) {
   })
   
   ## Output Weibull ---------------------------------
-  # Teiknar weibull dreifingar grafið og notar til þess weibb föllin
+  # Teiknar weibull dreifingar Graphið og notar til þess weibb föllin
   output$myPlot2 <- renderPlot({
-    if (as.integer(dataGraf2()) == fjoldiEldis+2) {
+    if (as.integer(dataGraph2()) == fjoldiEldis+2) {
       weibbS <- rep.int(0, fjoldiAa)
       weibbB <- rep.int(0, fjoldiAa)
       weibbSL <- rep.int(0, 2431)
@@ -626,7 +626,7 @@ server <- function(input, output) {
         xlab("River") + ylab("Percentage") + scale_x_discrete(breaks =
                                                                 NULL)
     } else{
-      stadsetning <- farmsites[as.integer(dataGraf2()) - 1, 2]
+      stadsetning <- farmsites[as.integer(dataGraph2()) - 1, 2]
       tolur <- data.frame(c(-1215:1215))
       colnames(tolur) = c('tolur')
       ggplot() + geom_point(data = riverdata,
