@@ -312,7 +312,7 @@ ui <- dashboardPagePlus(title = 'Newfoundland',
 
 # Server ---------------------------------
 server <- function(input, output) {
-  ## fastar ---------------------------------
+  ## constants ---------------------------------
   s3load(object = "inputs.RData", bucket = s3BucketName)
   inputs <<- inputs
   
@@ -322,6 +322,7 @@ server <- function(input, output) {
   defZoom = 5
   mybins=c(0,4,10,100)
   mypalette = colorBin( palette=c("red3", "gold", "darkgreen"), domain = c(0:100), na.color="transparent", bins=mybins,reverse = T)
+  
   ## Output UI controls ---------------------------------
   output$selectionsTons <- renderUI({
     tagList(
@@ -347,7 +348,7 @@ server <- function(input, output) {
   ## dataZoom ---------------------------------
   dataZoom <-
     reactive({
-      # Tekur inn zoom-level til að stilla af stærðir
+      # Takes in the zoom level to adjust marker size
       zoom <- input$mymap_zoom
       if (is.null(zoom)) {
         zoom = defZoom
@@ -355,10 +356,10 @@ server <- function(input, output) {
       zoom
     })
   
-  ## dataKviAdult ---------------------------------
-  # Föll sem taka inn riverdataýsingarnar um eldisstaðina og reikna út Distributionuna á fiskunum
-  dataKviAdult <- reactive({
-    kviAdult <- data.frame(
+  ## dataNetpenAdult ---------------------------------
+  # Function that puts the data into the Distribution function and gathers the output
+  dataNetpenAdult <- reactive({
+    NetpenAdult <- data.frame(
       lapply(rownames(farmsites),
              function(x)
              {
@@ -381,11 +382,11 @@ server <- function(input, output) {
              }
       )
     )
-    kviAdult
+    NetpenAdult
   })
-  ## dataKviSmolt ---------------------------------
-  dataKviSmolt <- reactive({
-    kviSmolt <- data.frame(
+  ## dataNetpenSmolt ---------------------------------
+  dataNetpenSmolt <- reactive({
+    NetpenSmolt <- data.frame(
       lapply(rownames(farmsites),
              function(x)
              {
@@ -406,12 +407,12 @@ server <- function(input, output) {
              }
       )
     )
-    kviSmolt
+    NetpenSmolt
   })
-  ## dataKviTotal ---------------------------------
-  dataKviTotal <- reactive({
-    kviTotal <- dataKviAdult() + dataKviSmolt()
-    kviTotal
+  ## dataNetpenTotal ---------------------------------
+  dataNetpenTotal <- reactive({
+    NetpenTotal <- dataNetpenAdult() + dataNetpenSmolt()
+    NetpenTotal
   })
   
   ## dataGraph ---------------------------------
@@ -434,37 +435,37 @@ server <- function(input, output) {
   })
   
   
-  ## dataKvi ---------------------------------
+  ## dataNetpen ---------------------------------
   #Fall sem setur upp data.frameið sem inniheldur allar riverdataýsingar, t.d. Distributionar, stock size o.fl
-  dataKvi <- reactive({
-    kvi <- data.frame(riverdata$Stock.Size,
-                      dataKviTotal(),
+  dataNetpen <- reactive({
+    Netpen <- data.frame(riverdata$Stock.Size,
+                      dataNetpenTotal(),
                       row.names =  as.character(riverdata$RiverName))
 
-    kvi$"Farmed salmons" <- rowSums(kvi[, 2:(amountOfEldis+1)])
-    colnames(kvi) <-
+    Netpen$"Farmed salmons" <- rowSums(Netpen[, 2:(amountOfEldis+1)])
+    colnames(Netpen) <-
       c(
         "Wild salmons",
         lapply(farmsites$SiteName,function(x) paste('Farmed salmons from',x)),
         "Farmed salmons"
       )
-    kvi$"Percentage of total" = round(kvi$"Farmed salmons" / (kvi$"Wild salmons"+kvi$"Farmed salmons"),
+    Netpen$"Percentage of total" = round(Netpen$"Farmed salmons" / (Netpen$"Wild salmons"+Netpen$"Farmed salmons"),
                                    digits = 4) * 100
-    Total <- colSums(kvi)
+    Total <- colSums(Netpen)
 
-    Total[amountOfEldis+3] = round(sum(kvi$"Farmed salmons") / (
-      sum(kvi$"Farmed salmons") + sum(kvi$"Wild salmons")
+    Total[amountOfEldis+3] = round(sum(Netpen$"Farmed salmons") / (
+      sum(Netpen$"Farmed salmons") + sum(Netpen$"Wild salmons")
     ), digits = 4)*100
-    kvi <- rbind(kvi, Total)
-    row.names(kvi) = c(as.character(riverdata$RiverName), "Total")
-    kvi
+    Netpen <- rbind(Netpen, Total)
+    row.names(Netpen) = c(as.character(riverdata$RiverName), "Total")
+    Netpen
   })
   
-  ## dataKviMagn ---------------------------------
+  ## dataNetpenMagn ---------------------------------
   
   # fall sem skilar vigri sem inniheldur magnið í öllum fjörðum
-  dataKviMagn <- reactive({
-    kviMagn <- c(lapply(
+  dataNetpenMagn <- reactive({
+    NetpenMagn <- c(lapply(
       rownames(farmsites),
       function(x){
         if(is.null(eval(parse(text = paste('input$tonn',x,sep = ""))))){
@@ -474,7 +475,7 @@ server <- function(input, output) {
         }
       }
     ))
-    kviMagn
+    NetpenMagn
   })
   
   
@@ -500,7 +501,7 @@ server <- function(input, output) {
           addCircleMarkers(
             lng = riverdata[j, 2],
             lat = riverdata[j, 3],
-            fillColor = mypalette(dataKvi()$'Percentage of total'[j]),
+            fillColor = mypalette(dataNetpen()$'Percentage of total'[j]),
             fillOpacity = 1,
             stroke = TRUE,
             color = 'black',
@@ -508,7 +509,7 @@ server <- function(input, output) {
             opacity = 1,
             radius = as.numeric(i)/2,
             group = "river",
-            label = paste("River: ", riverdata$RiverName[j], "<br/>", "Stock size: ", round(dataKvi()$'Wild salmons'[j],digits = 2), "<br/>", "Farmed salmons: ", round(dataKvi()$'Farmed salmons'[j],digits = 2), sep="") %>%
+            label = paste("River: ", riverdata$RiverName[j], "<br/>", "Stock size: ", round(dataNetpen()$'Wild salmons'[j],digits = 2), "<br/>", "Farmed salmons: ", round(dataNetpen()$'Farmed salmons'[j],digits = 2), sep="") %>%
               lapply(htmltools::HTML),
             labelOptions = labelOptions( style = list("font-weight" = "normal",  padding = "3px 8px"), textsize = "13px", direction = "auto")
           ) 
@@ -523,7 +524,7 @@ server <- function(input, output) {
     j <- 1
     leafletProxy("mymap") %>%
       clearGroup("eldi")
-    for (i in dataKviMagn()) {
+    for (i in dataNetpenMagn()) {
       if (i != 0) {
         leafletProxy("mymap") %>%
           addCircleMarkers(
@@ -547,7 +548,7 @@ server <- function(input, output) {
   ## Output plot ---------------------------------
   # Teiknar upp súluritið, síar út tóm eldi og ár sem verða ekki fyrir áhrifum
   output$myPlot1 <- renderPlot({
-    yCoord <- dataKvi()[1:amountOfRivers, as.integer(dataGraph())]
+    yCoord <- dataNetpen()[1:amountOfRivers, as.integer(dataGraph())]
     yCoord <- yCoord[order(riverdata$"position")]
     xNofn <- riverdata$RiverName[order(riverdata$"position")]
     xNofn <- factor(xNofn, levels = unique(xNofn))
@@ -561,13 +562,13 @@ server <- function(input, output) {
       influence = 0
     }
     if (input$radio == 1) {
-      ggplot(data = dataKvi()[influence, ], aes(x = xNofn[influence], y = yCoord[influence])) + geom_bar(stat =
+      ggplot(data = dataNetpen()[influence, ], aes(x = xNofn[influence], y = yCoord[influence])) + geom_bar(stat =
                                                                                               "identity") + xlab("Salmon river") + ylab("Amount of farmed salmons in river") + theme(axis.text.x = element_text(angle = 60, hjust = 1))
     }
     else{
-      amountOfVilltra <- dataKvi()[order(riverdata$"position"), 1]
+      amountOfVilltra <- dataNetpen()[order(riverdata$"position"), 1]
       prosentur <- yCoord / (amountOfVilltra + yCoord) * 100
-      ggplot(data = dataKvi()[influence, ], aes(x = xNofn[influence], y = prosentur[influence])) + geom_bar(stat =
+      ggplot(data = dataNetpen()[influence, ], aes(x = xNofn[influence], y = prosentur[influence])) + geom_bar(stat =
                                                                                                   "identity", aes(fill = ifelse(prosentur[influence] < 4, "darkgreen", ifelse(prosentur[influence] < 10, "gold", "red3")))) + xlab("Salmon river") + ylab("Percentage of farmed salmons in river") + theme(axis.text.x = element_text(angle = 60, hjust = 1)) + geom_hline(yintercept =  4, color = "gold") + geom_hline(yintercept =  10, color = "red3") +scale_fill_manual(values = c('darkgreen', 'gold','red3'))  + theme(legend.position =
                                                                                                                                                                                                                                                                                                                                                                                               "none")
     }
@@ -670,15 +671,15 @@ server <- function(input, output) {
   ## Output table ---------------------------------
   # skrifar út töfluna
   output$table <- DT::renderDataTable({
-    yCoord <- dataKvi()[1:(amountOfRivers+1), "Farmed salmons"]
-    xCoord <- dataKvi()[(amountOfRivers+1), ]
+    yCoord <- dataNetpen()[1:(amountOfRivers+1), "Farmed salmons"]
+    xCoord <- dataNetpen()[(amountOfRivers+1), ]
     influenceX <- which(xCoord != 0, arr.ind = T)[, 2]
-    if (sum(dataKvi()[1:amountOfRivers, "Farmed salmons"]) != 0) {
+    if (sum(dataNetpen()[1:amountOfRivers, "Farmed salmons"]) != 0) {
       influenceY <- which(yCoord != 0, arr.ind = T)
-      df <- dataKvi()[influenceY, influenceX]
+      df <- dataNetpen()[influenceY, influenceX]
     } else{
       influenceY <- c(1:amountOfRivers)
-      df  = data.frame(dataKvi()$"Wild salmons"[1:amountOfRivers], row.names = riverdata$RiverName)
+      df  = data.frame(dataNetpen()$"Wild salmons"[1:amountOfRivers], row.names = riverdata$RiverName)
       colnames(df) = "Wild salmons"
     }
     datatable(df,
@@ -786,6 +787,8 @@ server <- function(input, output) {
     weibull <- ifelse(amendedDistance > 0, (beta/eta)*((amendedDistance/eta)^(beta-1))*exp(-1*((amendedDistance/eta)^beta)),0)
     return(weibull)
   }
+  
+  
   ## weib line ---------------------------------
   weibL <- function(arg1, beta, eta){
     
