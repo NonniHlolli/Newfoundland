@@ -317,7 +317,7 @@ server <- function(input, output) {
   inputs <<- inputs
   
   amountOfRivers <- nrow(riverdata)
-  amountOfEldis <- nrow(farmsites)
+  amountOfFarmed <- nrow(farmsites)
   
   defZoom = 5
   mybins=c(0,4,10,100)
@@ -420,7 +420,7 @@ server <- function(input, output) {
   dataGraph <- reactive({
     Graph <- input$Graph
     if (Graph == 1) {
-      Graph = amountOfEldis+2
+      Graph = amountOfFarmed+2
     }
     Graph
   })
@@ -429,7 +429,7 @@ server <- function(input, output) {
   dataGraph2 <- reactive({
     Graph2 <- input$Graph2
     if (Graph2 == 1) {
-      Graph2 = amountOfEldis+2
+      Graph2 = amountOfFarmed+2
     }
     Graph2
   })
@@ -442,7 +442,7 @@ server <- function(input, output) {
                       dataNetpenTotal(),
                       row.names =  as.character(riverdata$RiverName))
 
-    Netpen$"Farmed salmons" <- rowSums(Netpen[, 2:(amountOfEldis+1)])
+    Netpen$"Farmed salmons" <- rowSums(Netpen[, 2:(amountOfFarmed+1)])
     colnames(Netpen) <-
       c(
         "Wild salmons",
@@ -453,7 +453,7 @@ server <- function(input, output) {
                                    digits = 4) * 100
     Total <- colSums(Netpen)
 
-    Total[amountOfEldis+3] = round(sum(Netpen$"Farmed salmons") / (
+    Total[amountOfFarmed+3] = round(sum(Netpen$"Farmed salmons") / (
       sum(Netpen$"Farmed salmons") + sum(Netpen$"Wild salmons")
     ), digits = 4)*100
     Netpen <- rbind(Netpen, Total)
@@ -550,8 +550,8 @@ server <- function(input, output) {
   output$myPlot1 <- renderPlot({
     yCoord <- dataNetpen()[1:amountOfRivers, as.integer(dataGraph())]
     yCoord <- yCoord[order(riverdata$"position")]
-    xNofn <- riverdata$RiverName[order(riverdata$"position")]
-    xNofn <- factor(xNofn, levels = unique(xNofn))
+    xNames <- riverdata$RiverName[order(riverdata$"position")]
+    xNames <- factor(xNames, levels = unique(xNames))
     if (input$all == 1) {
       influence <- which(yCoord != 0, arr.ind = T)
     }
@@ -562,13 +562,13 @@ server <- function(input, output) {
       influence = 0
     }
     if (input$radio == 1) {
-      ggplot(data = dataNetpen()[influence, ], aes(x = xNofn[influence], y = yCoord[influence])) + geom_bar(stat =
+      ggplot(data = dataNetpen()[influence, ], aes(x = xNames[influence], y = yCoord[influence])) + geom_bar(stat =
                                                                                               "identity") + xlab("Salmon river") + ylab("Amount of farmed salmons in river") + theme(axis.text.x = element_text(angle = 60, hjust = 1))
     }
     else{
       amountOfWild <- dataNetpen()[order(riverdata$"position"), 1]
       prosentur <- yCoord / (amountOfWild + yCoord) * 100
-      ggplot(data = dataNetpen()[influence, ], aes(x = xNofn[influence], y = prosentur[influence])) + geom_bar(stat =
+      ggplot(data = dataNetpen()[influence, ], aes(x = xNames[influence], y = prosentur[influence])) + geom_bar(stat =
                                                                                                   "identity", aes(fill = ifelse(prosentur[influence] < 4, "darkgreen", ifelse(prosentur[influence] < 10, "gold", "red3")))) + xlab("Salmon river") + ylab("Percentage of farmed salmons in river") + theme(axis.text.x = element_text(angle = 60, hjust = 1)) + geom_hline(yintercept =  4, color = "gold") + geom_hline(yintercept =  10, color = "red3") +scale_fill_manual(values = c('darkgreen', 'gold','red3'))  + theme(legend.position =
                                                                                                                                                                                                                                                                                                                                                                                               "none")
     }
@@ -577,14 +577,14 @@ server <- function(input, output) {
   ## Output Weibull ---------------------------------
   # Plots the weibull plots using the weib and weibL functions
   output$myPlot2 <- renderPlot({
-    if (as.integer(dataGraph2()) == amountOfEldis+2) {
+    if (as.integer(dataGraph2()) == amountOfFarmed+2) {
       weibbS <- rep.int(0, amountOfRivers)
       weibbB <- rep.int(0, amountOfRivers)
       weibbSL <- rep.int(0, 2431)
       weibbBL <- rep.int(0, 2431)
       nums <- data.frame(c(-1215:1215))
       colnames(nums) = c('nums')
-      for (i in c(1:amountOfEldis)) {
+      for (i in c(1:amountOfFarmed)) {
         weibbS = weibbS + weib(farmsites[i, 2], input$beta, input$eta)
         weibbB = weibbB + weib(farmsites[i, 2], input$beta2, input$eta2)
         weibbSL = weibbSL + weibL(farmsites[i, 2], input$beta, input$eta)
