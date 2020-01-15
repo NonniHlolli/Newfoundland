@@ -461,11 +461,11 @@ server <- function(input, output) {
     Netpen
   })
   
-  ## dataNetpenMagn ---------------------------------
+  ## dataNetpenAmount ---------------------------------
   
-  # fall sem skilar vigri sem inniheldur magnið í öllum fjörðum
-  dataNetpenMagn <- reactive({
-    NetpenMagn <- c(lapply(
+  # fall sem skilar vigri sem inniheldur Amountið í öllum fjörðum
+  dataNetpenAmount <- reactive({
+    NetpenAmount <- c(lapply(
       rownames(farmsites),
       function(x){
         if(is.null(eval(parse(text = paste('input$tonn',x,sep = ""))))){
@@ -475,7 +475,7 @@ server <- function(input, output) {
         }
       }
     ))
-    NetpenMagn
+    NetpenAmount
   })
   
   
@@ -524,7 +524,7 @@ server <- function(input, output) {
     j <- 1
     leafletProxy("mymap") %>%
       clearGroup("eldi")
-    for (i in dataNetpenMagn()) {
+    for (i in dataNetpenAmount()) {
       if (i != 0) {
         leafletProxy("mymap") %>%
           addCircleMarkers(
@@ -546,7 +546,7 @@ server <- function(input, output) {
   })
   
   ## Output plot ---------------------------------
-  # Teiknar upp súluritið, síar út tóm eldi og ár sem verða ekki fyrir áhrifum
+  # Plots the bar plot filtering out uninfluenced rivers
   output$myPlot1 <- renderPlot({
     yCoord <- dataNetpen()[1:amountOfRivers, as.integer(dataGraph())]
     yCoord <- yCoord[order(riverdata$"position")]
@@ -566,8 +566,8 @@ server <- function(input, output) {
                                                                                               "identity") + xlab("Salmon river") + ylab("Amount of farmed salmons in river") + theme(axis.text.x = element_text(angle = 60, hjust = 1))
     }
     else{
-      amountOfVilltra <- dataNetpen()[order(riverdata$"position"), 1]
-      prosentur <- yCoord / (amountOfVilltra + yCoord) * 100
+      amountOfWild <- dataNetpen()[order(riverdata$"position"), 1]
+      prosentur <- yCoord / (amountOfWild + yCoord) * 100
       ggplot(data = dataNetpen()[influence, ], aes(x = xNofn[influence], y = prosentur[influence])) + geom_bar(stat =
                                                                                                   "identity", aes(fill = ifelse(prosentur[influence] < 4, "darkgreen", ifelse(prosentur[influence] < 10, "gold", "red3")))) + xlab("Salmon river") + ylab("Percentage of farmed salmons in river") + theme(axis.text.x = element_text(angle = 60, hjust = 1)) + geom_hline(yintercept =  4, color = "gold") + geom_hline(yintercept =  10, color = "red3") +scale_fill_manual(values = c('darkgreen', 'gold','red3'))  + theme(legend.position =
                                                                                                                                                                                                                                                                                                                                                                                               "none")
@@ -575,7 +575,7 @@ server <- function(input, output) {
   })
   
   ## Output Weibull ---------------------------------
-  # Teiknar weibull Distributionar Graphið og notar til þess weibb föllin
+  # Plots the weibull plots using the weib and weibL functions
   output$myPlot2 <- renderPlot({
     if (as.integer(dataGraph2()) == amountOfEldis+2) {
       weibbS <- rep.int(0, amountOfRivers)
@@ -627,40 +627,40 @@ server <- function(input, output) {
         xlab("River") + ylab("Percentage") + scale_x_discrete(breaks =
                                                                 NULL)
     } else{
-      stadsetning <- farmsites[as.integer(dataGraph2()) - 1, 2]
+      position <- farmsites[as.integer(dataGraph2()) - 1, 2]
       nums <- data.frame(c(-1215:1215))
       colnames(nums) = c('nums')
       ggplot() + geom_point(data = riverdata,
                             aes(
                               x = position,
-                              y = weib(stadsetning, input$beta, input$eta),
+                              y = weib(position, input$beta, input$eta),
                               colour = "Early escapees"
                             )) +
         geom_line(data = nums, aes(
           x = nums,
-          y = weibL(stadsetning, input$beta, input$eta),
+          y = weibL(position, input$beta, input$eta),
           colour = "Early escapees"
         )) +
         geom_point(data = riverdata, aes(
           x = position,
-          y = weib(stadsetning, input$beta2, input$eta2),
+          y = weib(position, input$beta2, input$eta2),
           colour = "Late escapees"
         )) +
         geom_line(data = nums, aes(
           x = nums,
-          y = weibL(stadsetning, input$beta2, input$eta2),
+          y = weibL(position, input$beta2, input$eta2),
           colour = "Late escapees"
         )) +
         geom_point(data = riverdata,
                    aes(
                      x = position,
-                     y = weib(stadsetning, input$beta2, input$eta2) + weib(stadsetning, input$beta, input$eta),
+                     y = weib(position, input$beta2, input$eta2) + weib(position, input$beta, input$eta),
                      colour = "Total escapees"
                    )) +
         geom_line(data = nums,
                   aes(
                     x = nums,
-                    y = weibL(stadsetning, input$beta2, input$eta2) + weibL(stadsetning, input$beta, input$eta),
+                    y = weibL(position, input$beta2, input$eta2) + weibL(position, input$beta, input$eta),
                     colour = "Total escapees"
                   )) +
         xlab("River") + ylab("Percentage") + scale_x_discrete(breaks =
@@ -669,7 +669,7 @@ server <- function(input, output) {
   })
   
   ## Output table ---------------------------------
-  # skrifar út töfluna
+  # Creates the table
   output$table <- DT::renderDataTable({
     yCoord <- dataNetpen()[1:(amountOfRivers+1), "Farmed salmons"]
     xCoord <- dataNetpen()[(amountOfRivers+1), ]
@@ -691,7 +691,8 @@ server <- function(input, output) {
   })
   
  
-  ## Distribution ---------------------------------
+  ## Distribution function ---------------------------------
+  # Function that calculates the distribution of adult fish based on position of farmsite arg1
   Distribution <- function(arg1, beta, eta, annualProd, escapesPerTon, sexMat, seatime, crit, home){
     
     
@@ -727,7 +728,8 @@ server <- function(input, output) {
     return(FarmedFishInRiver[1:amountOfRivers])
   }
   
-  ## smoltDistribution ---------------------------------
+  ## smoltDistribution function ---------------------------------
+  # Function that calculates the distribution of smolts based on position of farmsite arg1
   smoltDistribution <- function(arg1, beta, eta, annualProd, escapesPerTon,survival,home){
     
     nums <- c(1:4200)
@@ -765,7 +767,8 @@ server <- function(input, output) {
     return(FarmedFishInRiver[1:amountOfRivers])
   }
   
-  ## weib ---------------------------------
+  ## weib function ---------------------------------
+  # function to plot where points fall on a weibull plot
   weib<-function(arg1, beta, eta){
     
     nums <- c(1:4200)
@@ -789,7 +792,8 @@ server <- function(input, output) {
   }
   
   
-  ## weib line ---------------------------------
+  ## weib line function ---------------------------------
+  # function to plot a weibull distribution
   weibL <- function(arg1, beta, eta){
     
     nums <- c(1:4200)
