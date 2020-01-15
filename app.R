@@ -519,11 +519,11 @@ server <- function(input, output) {
   })
   
   ## Output map circles ---------------------------------
-  # Teiknar upp reuðu hringina fyrir eldin
+  # Draws the blue farmsite circles
   observe({
     j <- 1
     leafletProxy("mymap") %>%
-      clearGroup("eldi")
+      clearGroup("farmsites")
     for (i in dataNetpenAmount()) {
       if (i != 0) {
         leafletProxy("mymap") %>%
@@ -536,7 +536,7 @@ server <- function(input, output) {
             color = 'black',
             weight = 1,
             radius = sqrt(i)*2,
-            group = "eldi",
+            group = "farmsites",
             label = farmsites[j,1],
             popup = paste(as.character(i), "thousand tons", sep = " ")
           )
