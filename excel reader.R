@@ -1,3 +1,5 @@
+# Script to read in the csv files to edit the river and farmsite data
+
 riverdata <- read.csv('rivers.csv',header = TRUE,sep = ';')
 riverdata$V <- as.numeric(sub(",", ".", as.character(riverdata$V),fixed = TRUE))
 riverdata$N <- as.numeric(sub(",", ".", as.character(riverdata$N),fixed = TRUE))

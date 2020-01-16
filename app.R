@@ -17,8 +17,8 @@ riverdata <<- riverdata
 
 
 s3BucketName <- "data.riskassessment.newfoundland"
-Sys.setenv("AWS_ACCESS_KEY_ID" = "AKIAXOJJPR7FB37FVOFX",
-           "AWS_SECRET_ACCESS_KEY" = "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",
+Sys.setenv("AWS_ACCESS_KEY_ID" = Id,
+           "AWS_SECRET_ACCESS_KEY" = Key,
            "AWS_DEFAULT_REGION" = "eu-west-1")
 
 s3load(object = "inputs.RData", bucket = s3BucketName)
@@ -436,7 +436,7 @@ server <- function(input, output) {
   
   
   ## dataNetpen ---------------------------------
-  #Fall sem setur upp data.frameið sem inniheldur allar riverdataýsingar, t.d. Distributionar, stock size o.fl
+  #Function that gathers all the data per river
   dataNetpen <- reactive({
     Netpen <- data.frame(riverdata$Stock.Size,
                       dataNetpenTotal(),
@@ -463,7 +463,7 @@ server <- function(input, output) {
   
   ## dataNetpenAmount ---------------------------------
   
-  # fall sem skilar vigri sem inniheldur Amountið í öllum fjörðum
+  # Function that takes in the amount per farmsite
   dataNetpenAmount <- reactive({
     NetpenAmount <- c(lapply(
       rownames(farmsites),
@@ -480,7 +480,7 @@ server <- function(input, output) {
   
   
   ## Output map ---------------------------------
-  # Kortið teiknað upp og stillt´á Ísland
+  # The map set up
   output$mymap <- renderLeaflet({
     leaflet(options = leafletOptions(minZoom = 1, maxZoom = 15)) %>%
       addProviderTiles(providers$Hydda.Base) %>%
