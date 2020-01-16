@@ -1,0 +1,12 @@
+name: Newfoundland
+title: Newfoundland
+username:
+account: jonhlodver
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 740327
+bundleId: 2730876
+url: https://jonhlodver.shinyapps.io/Newfoundland/
+when: 1579100886.61776
+asMultiple: FALSE
+asStatic: FALSE

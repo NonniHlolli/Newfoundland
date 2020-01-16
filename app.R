@@ -17,8 +17,8 @@ riverdata <<- riverdata
 
 
 s3BucketName <- "data.riskassessment.newfoundland"
-Sys.setenv("AWS_ACCESS_KEY_ID" = Id,
-           "AWS_SECRET_ACCESS_KEY" = Key,
+Sys.setenv("AWS_ACCESS_KEY_ID" = "AKIAXOJJPR7FB37FVOFX",
+           "AWS_SECRET_ACCESS_KEY" = "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",
            "AWS_DEFAULT_REGION" = "eu-west-1")
 
 s3load(object = "inputs.RData", bucket = s3BucketName)
@@ -490,7 +490,7 @@ server <- function(input, output) {
     
   })
   ## Output map rivers ---------------------------------
-  # Kökuritin teiknuð inn, proxy notað til að kortið sjálft endurstillist ekki einungis kökurnar
+  # Rivers draw on the map
   observe({
     j <- 1
     leafletProxy("mymap") %>%
